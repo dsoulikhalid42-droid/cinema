@@ -9,46 +9,33 @@
 </head>
 <body>
 
-    <header class="navbar" id="navbar">
-        <div class="nav-left">
-            <button class="hamburger"><i class="fas fa-bars"></i></button>
-            <a href="#home" class="logo">U4FILMS</a>
+    <header class="f-navbar" id="navbar">
+        <div class="f-nav-left">
+            <button class="f-hamburger"><i class="fas fa-bars"></i></button>
+            <a href="#home" class="f-logo"><span class="f-logo-accent">U4</span>FILMS</a>
         </div>
         
-        <div class="nav-center">
-            <form id="search-form-desktop" class="search-box-desktop">
-                <input type="text" id="search-input-desktop" placeholder="Search movies..." autocomplete="off">
+        <div class="f-nav-center">
+            <form id="search-desk" class="f-search-desk">
+                <input type="text" id="search-input-desk" placeholder="Search movies..." autocomplete="off">
                 <button type="submit"><i class="fas fa-search"></i></button>
             </form>
         </div>
 
-        <div class="nav-right">
-            <button class="mobile-search-btn" onclick="window.scrollTo(0,0); document.getElementById('search-input-desktop').focus();"><i class="fas fa-search"></i></button>
+        <div class="f-nav-right">
+            <button class="f-mobile-search" onclick="window.scrollTo(0,0); document.getElementById('search-input-desk').focus();"><i class="fas fa-search"></i></button>
         </div>
     </header>
 
     <main id="app">
         </main>
 
-    <div class="mobile-bottom-nav">
-        <a href="#home" class="b-nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
-        <a href="#home" class="b-nav-item"><i class="fas fa-film"></i><span>Movies</span></a>
-        <a href="#home" class="b-nav-item"><i class="fas fa-tv"></i><span>TV Shows</span></a>
-        <a href="#home" class="b-nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+    <div class="f-bottom-nav">
+        <a href="#home" class="f-nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="#home" class="f-nav-item"><i class="fas fa-film"></i><span>Movies</span></a>
+        <a href="#home" class="f-nav-item"><i class="fas fa-tv"></i><span>TV Shows</span></a>
+        <a href="#home" class="f-nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
     </div>
-
-    <footer>
-        <div class="footer-logo">U4FILMS</div>
-        <div class="footer-links">
-            <a href="#home">Movies</a>
-            <a href="#home">TV Shows</a>
-            <a href="#home">Contact</a>
-            <a href="#home">Policy</a>
-        </div>
-        <div>
-            <p style="color: var(--accent); margin-bottom: 5px;">Disclaimer: This site does not store any files on our server.</p>
-        </div>
-    </footer>
 
     <script src="config.js"></script>
     <script src="api.js"></script>
