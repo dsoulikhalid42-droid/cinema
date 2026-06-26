@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U4films - Watch Movies & TV Shows Online Free</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="nav-left">
+            <button class="hamburger" id="mobile-menu-btn" aria-label="Toggle Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a href="#home" class="logo">
+                <span class="logo-accent">U4</span>FILMS
+            </a>
+            <nav class="desktop-nav">
+                <a href="#home" class="nav-link"><i class="fas fa-home"></i> Home</a>
+                <a href="#movies" class="nav-link"><i class="fas fa-film"></i> Movies</a>
+                <a href="#tv" class="nav-link"><i class="fas fa-tv"></i> TV Shows</a>
+            </nav>
+        </div>
+        <div class="nav-right">
+            <form id="search-form" class="search-bar">
+                <input type="text" id="search-input" placeholder="Search movies, TV shows..." autocomplete="off">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+    </header>
+
+    <div class="mobile-drawer" id="mobile-drawer">
+        <div class="drawer-header">
+            <span class="logo-accent">U4</span>FILMS
+            <button id="close-menu-btn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="drawer-links">
+            <a href="#home" class="drawer-link"><i class="fas fa-home"></i> Home</a>
+            <a href="#movies" class="drawer-link"><i class="fas fa-film"></i> Movies</a>
+            <a href="#tv" class="drawer-link"><i class="fas fa-tv"></i> TV Shows</a>
+        </div>
+    </div>
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+
+    <main id="app">
+        </main>
+
+    <div class="mobile-bottom-nav">
+        <a href="#home" class="b-nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="#movies" class="b-nav-item"><i class="fas fa-film"></i><span>Movies</span></a>
+        <a href="#tv" class="b-nav-item"><i class="fas fa-tv"></i><span>TV</span></a>
+        <a href="#search" class="b-nav-item" id="mobile-search-trigger"><i class="fas fa-search"></i><span>Search</span></a>
+    </div>
+
+    <footer>
+        <div class="footer-logo">
+            <span class="logo-accent">U4</span>FILMS
+        </div>
+        <div class="footer-links">
+            <a href="#movies">Movies</a>
+            <a href="#tv">TV Shows</a>
+            <a href="#home">Request</a>
+            <a href="#home">Contact</a>
+            <a href="#home">Privacy Policy</a>
+        </div>
+        <div class="footer-disclaimer">
+            <p>U4films offers a premier interface to browse streaming indices online. Explore deep catalogs of metadata instantly without registrations.</p>
+            <p class="teal-text">Disclaimer: This site does not store any files on our server, we only link to media hosted on 3rd party services.</p>
+        </div>
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="api.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
