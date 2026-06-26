@@ -1,265 +1,187 @@
-// app.js
 const appContainer = document.getElementById('app');
 
-// State Engine Variables
-let currentVideoMetadata = { id: '', type: '', season: '1', episode: '1' };
+let heroLoopInterval;
+let selectedHeroIndex = 0;
+let rotationalItems = [];
+let currentMediaState = { id: '', type: '', season: '1', episode: '1' };
 
-// Router Controller
-function handleRouting() {
+function router() {
+    clearInterval(heroLoopInterval); 
     const hash = window.location.hash || '#home';
     window.scrollTo(0, 0);
     
     if (hash === '#home') {
         renderHomeView();
-    } else if (hash === '#movies') {
-        renderExploreView('movie');
-    } else if (hash === '#tv') {
-        renderExploreView('tv');
     } else if (hash.startsWith('#movie/') || hash.startsWith('#tv/')) {
-        const components = hash.substring(1).split('/');
-        const type = components[0];
-        const id = components[1];
+        const [type, id] = hash.substring(1).split('/');
         renderDetailsView(id, type);
     } else if (hash.startsWith('#search/')) {
         const query = hash.substring(8);
         renderSearchView(query);
-    } else if (hash === '#search') {
-        appContainer.innerHTML = `<div style="padding:40px 5%; margin-top:40px; text-align:center;">Use the search bar above to query media items.</div>`;
     }
 }
 
-window.addEventListener('hashchange', handleRouting);
-window.addEventListener('load', handleRouting);
+window.addEventListener('hashchange', router);
+window.addEventListener('load', router);
 
-// Global UI Setup Hooks
 document.getElementById('search-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const query = document.getElementById('search-input').value.trim();
     if (query) window.location.hash = `#search/${query}`;
 });
 
-// Navigation Drawer Interactivity
-const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-const closeMenuBtn = document.getElementById('close-menu-btn');
-const mobileDrawer = document.getElementById('mobile-drawer');
-const drawerOverlay = document.getElementById('drawer-overlay');
-
-function toggleMenu() {
-    mobileDrawer.classList.toggle('active');
-    drawerOverlay.classList.toggle('active');
-}
-mobileMenuBtn.addEventListener('click', toggleMenu);
-closeMenuBtn.addEventListener('click', toggleMenu);
-drawerOverlay.addEventListener('click', toggleMenu);
-document.querySelectorAll('.drawer-link').forEach(link => link.addEventListener('click', toggleMenu));
-
-// HTML Card Matrix Builder
-function createCardElement(item, explicitType) {
-    const type = explicitType || item.media_type || 'movie';
+function generateCardHTML(item, forcedType, isSlider = false) {
+    const type = forcedType || item.media_type || 'movie';
     const title = item.title || item.name || 'Untitled';
     const year = (item.release_date || item.first_air_date || '----').substring(0, 4);
-    const badgeType = type === 'movie' ? 'Movie' : 'TV';
     
     return `
-        <a href="#${type}/${item.id}" class="movie-card">
+        <a href="#${type}/${item.id}" class="movie-card ${isSlider ? 'slider-card' : ''}">
             <div class="img-wrapper">
-                <span class="card-badge">HD</span>
-                <img src="${item.poster_path ? CONFIG.IMG_URL + item.poster_path : 'https://via.placeholder.com/500x750?text=No+Poster'}" alt="${title}" class="card-img" loading="lazy">
+                <span class="card-hd-badge">HD</span>
+                <img src="${item.poster_path ? CONFIG.IMG_URL + item.poster_path : 'https://via.placeholder.com/500x750?text=U4films'}" class="card-img" loading="lazy">
             </div>
             <div class="card-info">
                 <div class="card-meta">
                     <span>${year}</span>
-                    <span>${badgeType}</span>
+                    <span class="type-badge">${type === 'movie' ? 'Movie' : 'TV Show'}</span>
                 </div>
-                <h3 class="card-title">${title}</h3>
+                <div class="card-title">${title}</div>
             </div>
         </a>
     `;
 }
 
-// UI Views Generators
 async function renderHomeView() {
-    appContainer.innerHTML = '<div style="text-align:center; padding:100px 0;"><i class="fas fa-spinner fa-spin fa-2x teal-text"></i></div>';
-    const trending = await api.getTrending();
-    const recommended = await api.getPopularMovies();
-
-    if (!trending || !recommended) {
-        appContainer.innerHTML = '<p style="text-align:center; padding:50px;">API communication issue. Please deploy changes and re-verify variables.</p>';
+    appContainer.innerHTML = '<div style="text-align:center; padding:120px 0;"><i class="fas fa-circle-notch fa-spin fa-2x teal-glow-text"></i></div>';
+    
+    const trendingData = await api.getTrending();
+    const recommendedData = await api.getRecommended();
+    
+    if (!trendingData || !recommendedData || recommendedData.length === 0) {
+        appContainer.innerHTML = `
+            <div style="text-align:center; padding:80px 5%; line-height:1.6;">
+                <h3>⚠️ Missing Environment Variable</h3>
+                <p>Please add TMDB_API_KEY to your Cloudflare Pages settings and re-deploy.</p>
+            </div>`;
         return;
     }
 
-    const banner = trending.results[0];
+    rotationalItems = trendingData.results.slice(0, 8);
+    const trendingSliderItems = trendingData.results.slice(0, 20);
 
     appContainer.innerHTML = `
-        <div class="hero animate-fade" style="background-image: url('${CONFIG.IMG_URL_ORIGINAL}${banner.backdrop_path}')">
+        <div id="dynamic-hero-mount"></div>
+        
+        <h2 class="section-title"><i class="fas fa-fire"></i> Trending Now <i class="fas fa-fire"></i></h2>
+        <div class="scroll-container animate-fade">
+            ${trendingSliderItems.map(item => generateCardHTML(item, item.media_type, true)).join('')}
+        </div>
+
+        <h2 class="section-title"><i class="fas fa-play-circle"></i> RECOMMENDED</h2>
+        <div class="grid-container animate-fade">
+            ${recommendedData.slice(0, 60).map(item => generateCardHTML(item, 'movie')).join('')}
+        </div>
+    `;
+
+    paintHeroFrame(rotationalItems[0]);
+    heroLoopInterval = setInterval(() => {
+        selectedHeroIndex = (selectedHeroIndex + 1) % rotationalItems.length;
+        paintHeroFrame(rotationalItems[selectedHeroIndex]);
+    }, 4000);
+}
+
+function paintHeroFrame(item) {
+    const target = document.getElementById('dynamic-hero-mount');
+    if (!target) return;
+
+    const title = item.title || item.name;
+    const year = (item.release_date || item.first_air_date || '').substring(0, 4);
+    const vote = item.vote_average ? item.vote_average.toFixed(1) : '8.9';
+    const type = item.media_type || 'movie';
+
+    target.innerHTML = `
+        <div class="hero animate-fade" style="background-image: url('${CONFIG.IMG_URL_ORIGINAL}${item.backdrop_path}')">
             <div class="hero-overlay"></div>
             <div class="hero-content">
-                <h1 class="hero-title">${banner.title || banner.name}</h1>
+                <h1 class="hero-title">${title}</h1>
                 <div class="meta-tags">
-                    <span class="badge">HD</span>
-                    <span class="badge-outline">${(banner.release_date || banner.first_air_date || '').substring(0, 4)}</span>
-                    <span><i class="fas fa-star" style="color:gold;"></i> ${banner.vote_average ? banner.vote_average.toFixed(1) : 'N/A'}</span>
+                    <span class="badge">4K</span>
+                    <span class="badge-outline">TV-MA</span>
+                    <span><i class="fas fa-star" style="color:gold;"></i> ${vote}</span>
+                    <span>${year}</span>
                 </div>
-                <a href="#${banner.media_type || 'movie'}/${banner.id}" class="btn-play">
+                <div class="genre-text">Action • Drama • Thriller</div>
+                <a href="#${type}/${item.id}" class="btn-play">
                     <i class="fas fa-play"></i> Watch Now
                 </a>
             </div>
-        </div>
-
-        <h2 class="section-title"><i class="fas fa-bolt"></i> Trending Now</h2>
-        <div class="scroll-container animate-fade">
-            ${trending.results.slice(1, 12).map(item => createCardElement(item)).join('')}
-        </div>
-
-        <h2 class="section-title"><i class="fas fa-heart"></i> Recommended For You</h2>
-        <div class="grid-container animate-fade">
-            ${recommended.results.slice(0, 12).map(item => createCardElement(item, 'movie')).join('')}
-        </div>
-    `;
-}
-
-async function renderExploreView(type) {
-    appContainer.innerHTML = '<div style="text-align:center; padding:100px 0;"><i class="fas fa-spinner fa-spin fa-2x teal-text"></i></div>';
-    const data = type === 'movie' ? await api.getPopularMovies() : await api.getPopularTV();
-    
-    appContainer.innerHTML = `
-        <h2 class="section-title" style="margin-top:100px; text-transform: capitalize;"><i class="fas fa-compass"></i> Popular ${type === 'movie' ? 'Movies' : 'TV Shows'}</h2>
-        <div class="grid-container animate-fade">
-            ${data.results.map(item => createCardElement(item, type)).join('')}
-        </div>
-    `;
-}
-
-async function renderSearchView(query) {
-    appContainer.innerHTML = '<div style="text-align:center; padding:100px 0;"><i class="fas fa-spinner fa-spin fa-2x teal-text"></i></div>';
-    const data = await api.search(query);
-    
-    appContainer.innerHTML = `
-        <h2 class="section-title" style="margin-top:100px;"><i class="fas fa-search"></i> Search Results: "${decodeURIComponent(query)}"</h2>
-        <div class="grid-container animate-fade">
-            ${data && data.results.length ? data.results.filter(i => i.poster_path).map(item => createCardElement(item)).join('') : '<p style="padding:0 5%;">No matching items discovered.</p>'}
         </div>
     `;
 }
 
 async function renderDetailsView(id, type) {
-    appContainer.innerHTML = '<div style="text-align:center; padding:100px 0;"><i class="fas fa-spinner fa-spin fa-2x teal-text"></i></div>';
+    appContainer.innerHTML = '<div style="text-align:center; padding:100px 0;"><i class="fas fa-circle-notch fa-spin fa-2x"></i></div>';
+    
     const item = await api.getDetails(id, type);
+    const similar = await api.getSimilar(id, type);
     if (!item) return;
 
-    currentVideoMetadata = { id, type, season: '1', episode: '1' };
-
+    currentMediaState = { id, type, season: '1', episode: '1' };
     const title = item.title || item.name;
     const year = (item.release_date || item.first_air_date || '----').substring(0, 4);
-    const overview = item.overview || 'No presentation copy provided.';
-    const director = item.credits?.crew?.find(c => c.job === 'Director')?.name || 'N/A';
-    const cast = item.credits?.cast?.slice(0, 4).map(c => c.name).join(', ') || 'N/A';
-
-    let mediaSelectorHTML = '';
-    if (type === 'tv') {
-        mediaSelectorHTML = `
-            <div class="selectors-wrapper">
-                <div class="selector-group">
-                    <label>Season:</label>
-                    <select class="custom-select" id="season-select" onchange="updateEpisodeBounds(this.value)">
-                        ${Array.from({ length: item.number_of_seasons || 1 }, (_, i) => `<option value="${i + 1}">Season ${i + 1}</option>`).join('')}
-                    </select>
-                </div>
-                <div class="selector-group">
-                    <label>Episode:</label>
-                    <select class="custom-select" id="episode-select" onchange="switchEpisode(this.value)">
-                        ${Array.from({ length: 24 }, (_, i) => `<option value="${i + 1}">Episode ${i + 1}</option>`).join('')}
-                    </select>
-                </div>
-            </div>
-        `;
-    }
+    const vote = item.vote_average ? item.vote_average.toFixed(1) : '0.0';
 
     appContainer.innerHTML = `
-        <div class="detail-view animate-fade">
-            <div class="player-container">
-                <iframe id="video-engine-frame" src="" allowfullscreen></iframe>
-            </div>
-
-            <div class="controls-panel">
-                ${mediaSelectorHTML}
-                <div class="server-switchers">
-                    <span class="server-label"><i class="fas fa-server"></i> Servers:</span>
-                    <button class="server-btn active" onclick="loadServerEndpoint(1, this)">Server 1 (VidSrc)</button>
-                    <button class="server-btn" onclick="loadServerEndpoint(2, this)">Server 2 (VidFast)</button>
-                    <button class="server-btn" onclick="loadServerEndpoint(3, this)">Server 3 (VidSrc.me)</button>
-                    <button class="server-btn" onclick="loadServerEndpoint(4, this)">Server 4 (2Embed)</button>
-                </div>
-            </div>
-
-            <div class="movie-details-info">
-                <h1>${title}</h1>
+        <div id="interactive-details-panel" class="hero animate-fade" style="background-image: url('${CONFIG.IMG_URL_ORIGINAL}${item.backdrop_path}'); height: 70vh;">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1 class="hero-title">${title}</h1>
                 <div class="meta-tags">
                     <span class="badge">4K</span>
-                    <span class="badge-outline">${year}</span>
-                    <span style="color:gold;"><i class="fas fa-star"></i> ${item.vote_average ? item.vote_average.toFixed(1) : '0.0'}</span>
+                    <span class="badge-outline">HD</span>
+                    <span><i class="fas fa-star" style="color:gold;"></i> ${vote}</span>
+                    <span>${year}</span>
                 </div>
-                <p class="detail-desc">${overview}</p>
-                <div class="info-matrix">
-                    <div class="matrix-label">Director</div><div>${director}</div>
-                    <div class="matrix-label">Starring</div><div>${cast}</div>
-                    <div class="matrix-label">Category</div><div style="text-transform:uppercase;">${type}</div>
-                </div>
+                <div class="genre-text">${item.genres?.map(g => g.name).join(' • ') || 'Entertainment'}</div>
+                <button class="btn-play" onclick="mountStreamingFrame()">
+                    <i class="fas fa-play"></i> Watch Now
+                </button>
             </div>
         </div>
-    `;
 
-    // Fire initialization frame deployment
-    executeFrameSourceUpdate(1);
+        <div id="video-frame-mount" class="player-container"></div>
+        
+        <div class="detail-overview">
+            <p>${item.overview}</p>
+        </div>
+
+        <h2 class="section-title section-title-left"><i class="fas fa-layer-group"></i> More Like This</h2>
+        <div class="grid-container">
+            ${similar?.results.slice(0, 12).map(sim => generateCardHTML(sim, type)).join('') || '<p style="padding: 0 5%;">No similar items loaded.</p>'}
+        </div>
+    `;
 }
 
-// Global scope bindings for inline DOM elements inside dynamic templates
-window.loadServerEndpoint = function(serverId, element) {
-    document.querySelectorAll('.server-btn').forEach(btn => btn.classList.remove('active'));
-    element.classList.add('active');
-    executeFrameSourceUpdate(serverId);
+window.mountStreamingFrame = function() {
+    document.getElementById('interactive-details-panel').style.display = 'none';
+    const playerBox = document.getElementById('video-frame-mount');
+    playerBox.style.display = 'block';
+
+    const { id, type, season, episode } = currentMediaState;
+    const srcUrl = type === 'movie' 
+        ? `https://vidsrc.to/embed/movie/${id}` 
+        : `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`;
+
+    playerBox.innerHTML = `<iframe src="${srcUrl}" allowfullscreen></iframe>`;
 };
 
-window.updateEpisodeBounds = function(seasonNum) {
-    currentVideoMetadata.season = seasonNum;
-    currentVideoMetadata.episode = '1';
-    const epSelect = document.getElementById('episode-select');
-    if (epSelect) epSelect.value = '1';
-    
-    const activeServerBtn = document.querySelector('.server-btn.active');
-    const currentServerId = activeServerBtn ? Array.from(activeServerBtn.parentNode.children).indexOf(activeServerBtn) : 1;
-    executeFrameSourceUpdate(currentServerId);
-};
-
-window.switchEpisode = function(epNum) {
-    currentVideoMetadata.episode = epNum;
-    const activeServerBtn = document.querySelector('.server-btn.active');
-    const currentServerId = activeServerBtn ? Array.from(activeServerBtn.parentNode.children).indexOf(activeServerBtn) : 1;
-    executeFrameSourceUpdate(currentServerId);
-};
-
-function executeFrameSourceUpdate(serverId) {
-    const frame = document.getElementById('video-engine-frame');
-    if (!frame) return;
-
-    const { id, type, season, episode } = currentVideoMetadata;
-    let targetUrl = '';
-
-    if (type === 'movie') {
-        switch(serverId) {
-            case 1: targetUrl = `https://vidsrc.to/embed/movie/${id}`; break;
-            case 2: targetUrl = `https://vidfast.pro/movie/${id}`; break;
-            case 3: targetUrl = `https://vidsrc.me/embed/movie?tmdb=${id}`; break;
-            case 4: targetUrl = `https://www.2embed.cc/embed/${id}`; break;
-        }
-    } else {
-        switch(serverId) {
-            case 1: targetUrl = `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`; break;
-            case 2: targetUrl = `https://vidfast.pro/tv/${id}/${season}/${episode}`; break;
-            case 3: targetUrl = `https://vidsrc.me/embed/tv?tmdb=${id}&sea=${season}&epi=${episode}`; break;
-            case 4: targetUrl = `https://www.2embed.cc/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`; break;
-        }
-    }
-
-    frame.src = targetUrl;
+async function renderSearchView(query) {
+    const data = await api.search(query);
+    appContainer.innerHTML = `
+        <h2 class="section-title section-title-left" style="margin-top:100px;"><i class="fas fa-search"></i> Results: "${decodeURIComponent(query)}"</h2>
+        <div class="grid-container">
+            ${data?.results.filter(i => i.poster_path).map(item => generateCardHTML(item, item.media_type)).join('') || '<p>No items found.</p>'}
+        </div>
+    `;
 }
