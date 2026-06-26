@@ -5,6 +5,16 @@ let selectedHeroIndex = 0;
 let rotationalItems = [];
 let currentMediaState = { id: '', type: '', season: '1', episode: '1' };
 
+// Navbar Scroll Effect
+window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    if (window.scrollY > 50) {
+        nav.classList.add('scrolled');
+    } else {
+        nav.classList.remove('scrolled');
+    }
+});
+
 function router() {
     clearInterval(heroLoopInterval); 
     const hash = window.location.hash || '#home';
@@ -24,41 +34,52 @@ function router() {
 window.addEventListener('hashchange', router);
 window.addEventListener('load', router);
 
-// Toggle search input on mobile
-document.querySelector('.search-btn').addEventListener('click', (e) => {
-    const input = document.getElementById('search-input');
-    if (window.innerWidth < 768) {
-        if (input.style.display === 'block' && input.value.trim() !== '') {
-            // Let it submit
-        } else {
-            e.preventDefault();
-            input.style.display = input.style.display === 'block' ? 'none' : 'block';
-            input.focus();
-        }
-    }
-});
-
-document.getElementById('search-form').addEventListener('submit', (e) => {
+// Search Handling
+document.getElementById('search-form-desktop').addEventListener('submit', (e) => {
     e.preventDefault();
-    const query = document.getElementById('search-input').value.trim();
+    const query = document.getElementById('search-input-desktop').value.trim();
     if (query) window.location.hash = `#search/${query}`;
 });
 
-// Card Builder (Text Inside Image)
-function generateCardHTML(item, forcedType) {
-    const type = forcedType || item.media_type || 'movie';
+// HTML Generators for different card styles
+function generateTrendingCard(item) {
+    const type = item.media_type || 'movie';
     const title = item.title || item.name || 'Untitled';
     const genreText = type === 'movie' ? 'movie' : 'tv show';
+    const imgPath = item.backdrop_path ? CONFIG.IMG_URL + item.backdrop_path : 'https://via.placeholder.com/600x337?text=U4films';
     
     return `
-        <a href="#${type}/${item.id}" class="movie-card">
-            <div class="img-wrapper">
-                <img src="${item.poster_path ? CONFIG.IMG_URL + item.poster_path : 'https://via.placeholder.com/500x750?text=U4films'}" class="card-img" loading="lazy">
-                <div class="card-overlay">
-                    <div class="card-title">${title}</div>
-                    <div class="card-genre">${genreText}</div>
-                </div>
+        <a href="#${type}/${item.id}" class="trending-card">
+            <img src="${imgPath}" class="trending-img" loading="lazy">
+            <div class="trending-overlay">
+                <div class="trending-title">${title}</div>
+                <div class="trending-genre">${genreText}</div>
             </div>
+        </a>
+    `;
+}
+
+function generateGridCard(item, forcedType) {
+    const type = forcedType || item.media_type || 'movie';
+    const title = item.title || item.name || 'Untitled';
+    const year = (item.release_date || item.first_air_date || '----').substring(0, 4);
+    const imgPath = item.poster_path ? CONFIG.IMG_URL + item.poster_path : 'https://via.placeholder.com/500x750?text=U4films';
+    
+    // Simulate duration formatting to match screenshot
+    const duration = type === 'movie' ? '1h 45m' : '45 min';
+
+    return `
+        <a href="#${type}/${item.id}" class="poster-card">
+            <div class="poster-img-wrapper">
+                <span class="hd-badge">HD</span>
+                <img src="${imgPath}" class="poster-img" loading="lazy">
+            </div>
+            <div class="poster-meta">
+                <span>${year}</span>
+                <span class="type-badge">${type === 'movie' ? 'Movie' : 'TV'}</span>
+                <span>${duration}</span>
+            </div>
+            <div class="poster-title">${title}</div>
         </a>
     `;
 }
@@ -75,32 +96,29 @@ async function renderHomeView() {
     }
 
     rotationalItems = trendingData.results.slice(0, 8);
-    const trendingSliderItems = trendingData.results.slice(0, 20);
+    const trendingSliderItems = trendingData.results.slice(0, 15);
 
-    // Notice we use "desktop-grid" for recommended. CSS makes it a slider on mobile, but grid on PC.
     appContainer.innerHTML = `
         <div id="dynamic-hero-mount"></div>
         
-        <h2 class="section-title"><i class="fas fa-fire" style="color: #fff;"></i> Trending Now <i class="fas fa-fire" style="color: #fff;"></i></h2>
-        <div class="scroll-container">
-            ${trendingSliderItems.map(item => generateCardHTML(item, item.media_type)).join('')}
+        <h2 class="section-title"><i class="fas fa-fire"></i> TRENDING</h2>
+        <div class="trending-container">
+            ${trendingSliderItems.map(item => generateTrendingCard(item)).join('')}
         </div>
 
-        <h2 class="section-title" style="margin-top: 40px;"><i class="fas fa-play" style="color: var(--accent);"></i> RECOMMENDED</h2>
-        <div class="scroll-container desktop-grid">
-            ${recommendedData.slice(0, 60).map(item => generateCardHTML(item, 'movie')).join('')}
+        <h2 class="section-title section-title-left" style="margin-top: 30px;"><i class="fas fa-play"></i> RECOMMENDED</h2>
+        <div class="grid-container">
+            ${recommendedData.slice(0, 60).map(item => generateGridCard(item, 'movie')).join('')}
         </div>
     `;
 
     setupSmoothHero();
 }
 
-// Smooth Crossfade Hero Engine
 function setupSmoothHero() {
     const target = document.getElementById('dynamic-hero-mount');
     if (!target) return;
 
-    // Create container for two layers to crossfade
     target.innerHTML = `
         <div id="hero-layer-1" class="hero active"></div>
         <div id="hero-layer-2" class="hero"></div>
@@ -136,15 +154,15 @@ function paintHeroLayer(div, item) {
         <div class="hero-content">
             <h1 class="hero-title">${title}</h1>
             <div class="meta-tags">
-                <span class="badge-4k">4K</span>
+                <span class="badge-cyan">4K</span>
                 <span class="badge-outline">TV-MA</span>
-                <span><i class="fas fa-star" style="color: #ccc;"></i> ${vote}</span>
+                <span><i class="fas fa-star" style="color: #fff; font-size: 0.6rem;"></i> ${vote}</span>
                 <span>${year}</span>
-                <span>2h</span>
+                <span>1h 55m</span>
             </div>
-            <div class="hero-genre">horror</div>
+            <div class="hero-genre">horror • thriller</div>
             <button class="btn-play" onclick="window.location.hash='#${type}/${item.id}'">
-                <i class="fas fa-play"></i> Watch Now
+                <i class="fas fa-play" style="font-size: 0.9rem;"></i> Watch Now
             </button>
         </div>
     `;
@@ -163,19 +181,19 @@ async function renderDetailsView(id, type) {
     const vote = item.vote_average ? item.vote_average.toFixed(1) : '0.0';
 
     appContainer.innerHTML = `
-        <div id="interactive-details-panel" style="position:relative; height: 60vh; background-image: url('${CONFIG.IMG_URL_ORIGINAL}${item.backdrop_path}'); background-size: cover; background-position: center top; display: flex; align-items: flex-end; justify-content: center; text-align: center;">
+        <div id="interactive-details-panel" style="position:relative; height: 65vh; background-image: url('${CONFIG.IMG_URL_ORIGINAL}${item.backdrop_path}'); background-size: cover; background-position: center top; display: flex; align-items: flex-end; justify-content: center; text-align: center;">
             <div class="hero-overlay"></div>
             <div class="hero-content">
                 <h1 class="hero-title">${title}</h1>
                 <div class="meta-tags">
-                    <span class="badge-4k">4K</span>
+                    <span class="badge-cyan">4K</span>
                     <span class="badge-outline">HD</span>
-                    <span><i class="fas fa-star" style="color: #ccc;"></i> ${vote}</span>
+                    <span><i class="fas fa-star" style="color: #fff; font-size: 0.6rem;"></i> ${vote}</span>
                     <span>${year}</span>
                 </div>
                 <div class="hero-genre">${item.genres?.map(g => g.name).join(' • ') || 'Media'}</div>
                 <button class="btn-play" onclick="mountStreamingFrame()">
-                    <i class="fas fa-play"></i> Watch Now
+                    <i class="fas fa-play" style="font-size: 0.9rem;"></i> Watch Now
                 </button>
             </div>
         </div>
@@ -187,8 +205,8 @@ async function renderDetailsView(id, type) {
         </div>
 
         <h2 class="section-title section-title-left"><i class="fas fa-play"></i> More Like This</h2>
-        <div class="scroll-container desktop-grid">
-            ${similar?.results.slice(0, 20).map(sim => generateCardHTML(sim, type)).join('') || '<p>No similar items found.</p>'}
+        <div class="grid-container">
+            ${similar?.results.slice(0, 18).map(sim => generateGridCard(sim, type)).join('') || '<p>No similar items found.</p>'}
         </div>
     `;
 }
@@ -211,8 +229,8 @@ async function renderSearchView(query) {
     const data = await api.search(query);
     appContainer.innerHTML = `
         <h2 class="section-title section-title-left" style="margin-top:100px;">Results: "${decodeURIComponent(query)}"</h2>
-        <div class="scroll-container desktop-grid" style="flex-wrap: wrap;">
-            ${data?.results.filter(i => i.poster_path).map(item => generateCardHTML(item, item.media_type)).join('') || '<p style="padding: 0 5%;">No items found.</p>'}
+        <div class="grid-container">
+            ${data?.results.filter(i => i.poster_path).map(item => generateGridCard(item, item.media_type)).join('') || '<p style="padding: 0 5%;">No items found.</p>'}
         </div>
     `;
 }
