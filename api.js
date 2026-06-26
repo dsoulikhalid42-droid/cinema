@@ -2,10 +2,11 @@ async function fetchFromTMDB(endpoint, extraParams = '') {
     try {
         const url = `${CONFIG.BASE_URL}${endpoint}?api_key=${CONFIG.TMDB_API_KEY}${extraParams}`;
         const response = await fetch(url);
-        if (!response.ok) throw new Error('TMDB communications failure');
+        
+        if (!response.ok) throw new Error('Failed to fetch from TMDB');
         return await response.json();
     } catch (error) {
-        console.error('API Error:', error);
+        console.error('Network Error:', error);
         return null;
     }
 }
