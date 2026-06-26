@@ -3,27 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>U4films - Watch Free Movies & TV Shows</title>
+    <title>U4films - Watch Free Movies</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
 
-    <header class="navbar">
+    <header class="navbar" id="navbar">
         <div class="nav-left">
             <button class="hamburger"><i class="fas fa-bars"></i></button>
             <a href="#home" class="logo"><span class="logo-accent">U4</span>FILMS</a>
         </div>
-        <div class="nav-right">
-            <form id="search-form" class="search-box">
-                <input type="text" id="search-input" placeholder="Search..." autocomplete="off">
-                <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+        
+        <!-- Desktop Search Bar (Centered) -->
+        <div class="nav-center">
+            <form id="search-form-desktop" class="search-box-desktop">
+                <input type="text" id="search-input-desktop" placeholder="Search movies..." autocomplete="off">
+                <button type="submit"><i class="fas fa-search"></i></button>
             </form>
+        </div>
+
+        <!-- Mobile Search Icon -->
+        <div class="nav-right">
+            <button class="mobile-search-btn" onclick="window.scrollTo(0,0); document.getElementById('search-input-desktop').focus();"><i class="fas fa-search"></i></button>
         </div>
     </header>
 
     <main id="app">
-        </main>
+        <!-- Dynamic Content Mounts Here -->
+    </main>
 
     <div class="mobile-bottom-nav">
         <a href="#home" class="b-nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
@@ -40,9 +48,8 @@
             <a href="#home">Contact</a>
             <a href="#home">Policy</a>
         </div>
-        <div class="footer-disclaimer">
-            <p style="color: var(--accent); margin-bottom: 8px;">Disclaimer: This site does not store any files on our server.</p>
-            <p>U4films is a premium UI interface linking to 3rd party media services.</p>
+        <div>
+            <p style="color: var(--accent); margin-bottom: 5px;">Disclaimer: This site does not store any files on our server.</p>
         </div>
     </footer>
 
