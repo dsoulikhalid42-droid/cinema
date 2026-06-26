@@ -34,38 +34,40 @@ function router() {
 window.addEventListener('hashchange', router);
 window.addEventListener('load', router);
 
-// Search Handling
+// PC Search
 document.getElementById('search-form-desktop').addEventListener('submit', (e) => {
     e.preventDefault();
     const query = document.getElementById('search-input-desktop').value.trim();
     if (query) window.location.hash = `#search/${query}`;
 });
 
-// HTML Generators for different card styles
+// Horizontal Trending Backdrops (16:9)
 function generateTrendingCard(item) {
     const type = item.media_type || 'movie';
     const title = item.title || item.name || 'Untitled';
     const genreText = type === 'movie' ? 'movie' : 'tv show';
-    const imgPath = item.backdrop_path ? CONFIG.IMG_URL + item.backdrop_path : 'https://via.placeholder.com/600x337?text=U4films';
+    const imgPath = item.backdrop_path ? CONFIG.IMG_URL + item.backdrop_path : 'https://via.placeholder.com/600x337/111/fff?text=U4films';
     
     return `
         <a href="#${type}/${item.id}" class="trending-card">
-            <img src="${imgPath}" class="trending-img" loading="lazy">
-            <div class="trending-overlay">
-                <div class="trending-title">${title}</div>
-                <div class="trending-genre">${genreText}</div>
+            <div class="trending-img-wrapper">
+                <img src="${imgPath}" class="trending-img" loading="lazy">
+                <div class="trending-overlay">
+                    <div class="trending-title">${title}</div>
+                    <div class="trending-genre">${genreText}</div>
+                </div>
             </div>
         </a>
     `;
 }
 
+// Vertical Recommended Posters (2:3)
 function generateGridCard(item, forcedType) {
     const type = forcedType || item.media_type || 'movie';
     const title = item.title || item.name || 'Untitled';
     const year = (item.release_date || item.first_air_date || '----').substring(0, 4);
-    const imgPath = item.poster_path ? CONFIG.IMG_URL + item.poster_path : 'https://via.placeholder.com/500x750?text=U4films';
+    const imgPath = item.poster_path ? CONFIG.IMG_URL + item.poster_path : 'https://via.placeholder.com/500x750/111/fff?text=U4films';
     
-    // Simulate duration formatting to match screenshot
     const duration = type === 'movie' ? '1h 45m' : '45 min';
 
     return `
@@ -101,12 +103,12 @@ async function renderHomeView() {
     appContainer.innerHTML = `
         <div id="dynamic-hero-mount"></div>
         
-        <h2 class="section-title"><i class="fas fa-fire"></i> TRENDING</h2>
+        <h2 class="section-title section-title-center"><i class="fas fa-fire"></i> TRENDING NOW <i class="fas fa-fire"></i></h2>
         <div class="trending-container">
             ${trendingSliderItems.map(item => generateTrendingCard(item)).join('')}
         </div>
 
-        <h2 class="section-title section-title-left" style="margin-top: 30px;"><i class="fas fa-play"></i> RECOMMENDED</h2>
+        <h2 class="section-title"><i class="fas fa-play"></i> RECOMMENDED</h2>
         <div class="grid-container">
             ${recommendedData.slice(0, 60).map(item => generateGridCard(item, 'movie')).join('')}
         </div>
