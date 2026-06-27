@@ -24,13 +24,33 @@ function router() {
 window.addEventListener('hashchange', router);
 window.addEventListener('load', router);
 
+// ---- SEARCH FUNCTIONALITY ----
+window.toggleMobileSearch = function() {
+    const bar = document.getElementById('mobile-search-bar');
+    if (bar.style.display === 'none' || bar.style.display === '') {
+        bar.style.display = 'block';
+        document.getElementById('search-input-mobile').focus();
+    } else {
+        bar.style.display = 'none';
+    }
+};
+
 document.getElementById('search-desk').addEventListener('submit', (e) => {
     e.preventDefault();
     const query = document.getElementById('search-input-desk').value.trim();
     if (query) window.location.hash = `#search/${query}`;
 });
 
-// TRENDING: Built with proper padding wrapper to lock 16:9 ratio
+document.getElementById('search-mobile').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const query = document.getElementById('search-input-mobile').value.trim();
+    if (query) {
+        window.location.hash = `#search/${query}`;
+        document.getElementById('mobile-search-bar').style.display = 'none';
+    }
+});
+
+// TRENDING 16:9 Card
 function genTrendCard(item) {
     const type = item.media_type || 'movie';
     const title = item.title || item.name || 'Untitled';
@@ -50,12 +70,14 @@ function genTrendCard(item) {
     `;
 }
 
-// RECOMMENDED: Built with proper padding wrapper to lock 2:3 vertical ratio
+// GRID 2:3 Card (Accepts Movies and TV)
 function genGridCard(item, forcedType) {
     const type = forcedType || item.media_type || 'movie';
     const title = item.title || item.name || 'Untitled';
     const year = (item.release_date || item.first_air_date || '----').substring(0, 4);
     const imgPath = item.poster_path ? CONFIG.IMG_URL + item.poster_path : 'https://via.placeholder.com/500x750/111/fff?text=No+Poster';
+    
+    // Dynamic Duration Mockup
     const duration = type === 'movie' ? '1h 45m' : '45 min';
 
     return `
@@ -74,29 +96,48 @@ function genGridCard(item, forcedType) {
     `;
 }
 
+// This overrides api.js internally to fetch TV and Movies simultaneously for the grid
+async function getMixedRecommendations() {
+    const p1 = fetchFromTMDB('/trending/movie/week', '&page=1');
+    const p2 = fetchFromTMDB('/trending/tv/week', '&page=1');
+    const p3 = fetchFromTMDB('/discover/movie', '&sort_by=popularity.desc&page=2');
+    const p4 = fetchFromTMDB('/discover/tv', '&sort_by=popularity.desc&page=2');
+    const [r1, r2, r3, r4] = await Promise.all([p1, p2, p3, p4]);
+    
+    let mixed = [];
+    if (r1?.results) mixed.push(...r1.results);
+    if (r2?.results) mixed.push(...r2.results);
+    if (r3?.results) mixed.push(...r3.results);
+    if (r4?.results) mixed.push(...r4.results);
+    
+    // Shuffle the array to mix TV and Movies randomly
+    return mixed.sort(() => 0.5 - Math.random());
+}
+
 async function renderHomeView() {
     appContainer.innerHTML = '<div style="text-align:center; padding:120px 0;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color: var(--accent);"></i></div>';
     
     const trendingData = await api.getTrending();
-    const recommendedData = await api.getRecommended();
+    const recommendedMixed = await getMixedRecommendations();
     
-    if (!trendingData || !recommendedData) return;
+    if (!trendingData || !recommendedMixed) return;
 
     rotationalItems = trendingData.results.filter(i => i.backdrop_path).slice(0, 8);
     const trendList = trendingData.results.filter(i => i.backdrop_path).slice(0, 15);
-    const gridList = recommendedData.filter(i => i.poster_path).slice(0, 60);
+    const gridList = recommendedMixed.filter(i => i.poster_path).slice(0, 60);
 
+    // Notice: Single Blue Fire icon, clean text, no extra icons.
     appContainer.innerHTML = `
         <div id="f-hero-mount" class="f-hero-wrapper"></div>
         
-        <h2 class="f-sec-title f-sec-center"><i class="fas fa-fire"></i> Trending Now <i class="fas fa-fire"></i></h2>
+        <h2 class="f-sec-title"><i class="fas fa-fire" style="color: var(--accent);"></i> TRENDING</h2>
         <div class="f-trend-slider">
             ${trendList.map(item => genTrendCard(item)).join('')}
         </div>
 
-        <h2 class="f-sec-title f-sec-left"><i class="fas fa-play"></i> RECOMMENDED</h2>
+        <h2 class="f-sec-title">RECOMMENDED</h2>
         <div class="f-grid">
-            ${gridList.map(item => genGridCard(item, 'movie')).join('')}
+            ${gridList.map(item => genGridCard(item, item.media_type)).join('')}
         </div>
     `;
 
@@ -178,7 +219,7 @@ async function renderDetailsView(id, type) {
         <div id="f-player-mount" class="f-player-wrap"></div>
         <div class="f-overview"><p>${item.overview}</p></div>
 
-        <h2 class="f-sec-title f-sec-left"><i class="fas fa-play"></i> More Like This</h2>
+        <h2 class="f-sec-title">More Like This</h2>
         <div class="f-grid">
             ${similar?.results.slice(0, 18).map(sim => genGridCard(sim, type)).join('') || '<p>No similar items.</p>'}
         </div>
@@ -197,7 +238,7 @@ async function renderSearchView(query) {
     appContainer.innerHTML = '<div style="text-align:center; padding:100px 0;"><i class="fas fa-circle-notch fa-spin fa-2x" style="color: var(--accent);"></i></div>';
     const data = await api.search(query);
     appContainer.innerHTML = `
-        <h2 class="f-sec-title f-sec-left" style="margin-top:100px;">Results: "${decodeURIComponent(query)}"</h2>
+        <h2 class="f-sec-title" style="margin-top:50px;">Results: "${decodeURIComponent(query)}"</h2>
         <div class="f-grid">
             ${data?.results.filter(i => i.poster_path).map(item => genGridCard(item, item.media_type)).join('')}
         </div>
