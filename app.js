@@ -30,7 +30,7 @@ document.getElementById('search-desk').addEventListener('submit', (e) => {
     if (query) window.location.hash = `#search/${query}`;
 });
 
-// TRENDING: Forces horizontal backdrop images
+// TRENDING: Built with proper padding wrapper to lock 16:9 ratio
 function genTrendCard(item) {
     const type = item.media_type || 'movie';
     const title = item.title || item.name || 'Untitled';
@@ -39,16 +39,18 @@ function genTrendCard(item) {
     
     return `
         <a href="#${type}/${item.id}" class="f-trend-card">
-            <img src="${imgPath}" loading="lazy">
-            <div class="f-trend-overlay">
-                <div class="f-trend-title">${title}</div>
-                <div class="f-trend-genre">${genreText}</div>
+            <div class="f-trend-img-wrap">
+                <img src="${imgPath}" loading="lazy">
+                <div class="f-trend-overlay">
+                    <div class="f-trend-title">${title}</div>
+                    <div class="f-trend-genre">${genreText}</div>
+                </div>
             </div>
         </a>
     `;
 }
 
-// RECOMMENDED: Forces vertical poster images
+// RECOMMENDED: Built with proper padding wrapper to lock 2:3 vertical ratio
 function genGridCard(item, forcedType) {
     const type = forcedType || item.media_type || 'movie';
     const title = item.title || item.name || 'Untitled';
