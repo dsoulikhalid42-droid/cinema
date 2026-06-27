@@ -3,39 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>U4films - Watch Free Movies</title>
+    <title>U4films - Watch Free Movies & TV</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
 
+    <!-- Main Navigation -->
     <header class="f-navbar" id="navbar">
         <div class="f-nav-left">
             <button class="f-hamburger"><i class="fas fa-bars"></i></button>
             <a href="#home" class="f-logo"><span class="f-logo-accent">U4</span>FILMS</a>
         </div>
         
+        <!-- PC Search -->
         <div class="f-nav-center">
             <form id="search-desk" class="f-search-desk">
-                <input type="text" id="search-input-desk" placeholder="Search movies..." autocomplete="off">
+                <input type="text" id="search-input-desk" placeholder="Search movies, tv shows..." autocomplete="off">
                 <button type="submit"><i class="fas fa-search"></i></button>
             </form>
         </div>
 
+        <!-- Mobile Search Icon -->
         <div class="f-nav-right">
-            <button class="f-mobile-search" onclick="window.scrollTo(0,0); document.getElementById('search-input-desk').focus();"><i class="fas fa-search"></i></button>
+            <button class="f-mobile-search" onclick="toggleMobileSearch()"><i class="fas fa-search"></i></button>
         </div>
     </header>
 
-    <main id="app">
-        </main>
-
-    <div class="f-bottom-nav">
-        <a href="#home" class="f-nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
-        <a href="#home" class="f-nav-item"><i class="fas fa-film"></i><span>Movies</span></a>
-        <a href="#home" class="f-nav-item"><i class="fas fa-tv"></i><span>TV Shows</span></a>
-        <a href="#home" class="f-nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+    <!-- Mobile Search Dropdown (Hidden by default) -->
+    <div id="mobile-search-bar" class="f-mobile-search-bar">
+        <form id="search-mobile" class="f-search-mobile-form">
+            <input type="text" id="search-input-mobile" placeholder="Search movies, tv shows..." autocomplete="off">
+            <button type="submit"><i class="fas fa-search"></i></button>
+        </form>
     </div>
+
+    <!-- Core App Mount -->
+    <main id="app">
+        <!-- Rendered by JS -->
+    </main>
+
+    <!-- Clean Footer -->
+    <footer>
+        <div class="footer-logo"><span style="color: var(--accent);">U4</span>FILMS</div>
+        <div class="footer-links">
+            <a href="#home">Movies</a>
+            <a href="#home">TV Shows</a>
+            <a href="#home">Contact</a>
+            <a href="#home">Policy</a>
+        </div>
+    </footer>
 
     <script src="config.js"></script>
     <script src="api.js"></script>
