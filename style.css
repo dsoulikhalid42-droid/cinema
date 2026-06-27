@@ -11,11 +11,11 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background-color: var(--bg-main); color: var(--text-main); font-family: var(--font-family); overflow-x: hidden; padding-bottom: 60px; }
+body { background-color: var(--bg-main); color: var(--text-main); font-family: var(--font-family); overflow-x: hidden; }
 a { text-decoration: none; color: inherit; }
 
 /* ---------------- HEADER & NAV ---------------- */
-.f-navbar { display: flex; justify-content: space-between; align-items: center; padding: 0 5%; height: 65px; background: rgba(10, 10, 10, 0.95); position: fixed; top: 0; width: 100%; z-index: 1000; backdrop-filter: blur(8px); }
+.f-navbar { display: flex; justify-content: space-between; align-items: center; padding: 0 5%; height: 65px; background: rgba(10, 10, 10, 0.95); position: fixed; top: 0; width: 100%; z-index: 1000; backdrop-filter: blur(8px); border-bottom: 1px solid #1a1a1a;}
 .f-nav-left { display: flex; align-items: center; gap: 15px; }
 .f-hamburger { background: none; border: none; color: var(--text-main); font-size: 1.4rem; cursor: pointer; }
 .f-logo { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; letter-spacing: 0.5px; }
@@ -27,58 +27,60 @@ a { text-decoration: none; color: inherit; }
 .f-search-desk button { background: none; border: none; color: #666; cursor: pointer; font-size: 0.9rem; }
 .f-nav-right .f-mobile-search { background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; }
 
-#app { min-height: 80vh; }
+/* Mobile Search Dropdown */
+.f-mobile-search-bar { display: none; position: fixed; top: 65px; left: 0; width: 100%; background: #111; padding: 10px 5%; z-index: 999; border-bottom: 1px solid #222; }
+.f-search-mobile-form { display: flex; background: #222; border-radius: 6px; overflow: hidden; }
+.f-search-mobile-form input { flex-grow: 1; background: none; border: none; color: #fff; padding: 10px 12px; outline: none; font-family: inherit; }
+.f-search-mobile-form button { background: var(--accent); border: none; color: #000; padding: 0 15px; font-size: 1rem; cursor: pointer; }
 
-/* ---------------- HERO SECTION (Fixes title cut-off) ---------------- */
-.f-hero-wrapper { position: relative; height: 65vh; background: #000; margin-bottom: 30px; }
+#app { min-height: 80vh; margin-top: 65px; }
+
+/* ---------------- HORIZONTAL HERO SECTION ---------------- */
+/* Reduced height to make it horizontal */
+.f-hero-wrapper { position: relative; height: 45vh; min-height: 350px; max-height: 450px; background: #000; margin-bottom: 30px; }
 .f-hero-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center top; display: flex; flex-direction: column; justify-content: flex-end; opacity: 0; transition: opacity 0.8s ease-in-out; }
 .f-hero-slide.active { opacity: 1; z-index: 2; }
-.f-hero-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, var(--bg-main) 0%, rgba(10,10,10,0.5) 60%, rgba(10,10,10,0.8) 100%); z-index: 1; }
+.f-hero-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, var(--bg-main) 0%, rgba(10,10,10,0.4) 60%, rgba(10,10,10,0.7) 100%); z-index: 1; }
 
-.f-hero-content { position: relative; z-index: 3; width: 100%; padding: 80px 5% 40px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.f-hero-title { font-size: 2.1rem; font-weight: 800; margin-bottom: 12px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.9); line-height: 1.15; }
+.f-hero-content { position: relative; z-index: 3; width: 100%; padding: 40px 5% 30px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.f-hero-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.9); line-height: 1.15; }
 
-.f-hero-meta { display: flex; gap: 8px; align-items: center; justify-content: center; margin-bottom: 10px; font-size: 0.75rem; font-weight: 500; color: #ddd; flex-wrap: wrap; }
+.f-hero-meta { display: flex; gap: 8px; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 0.75rem; font-weight: 500; color: #ddd; flex-wrap: wrap; }
 .f-badge-cyan { background-color: var(--accent); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: 800; }
 .f-badge-out { border: 1px solid #ccc; padding: 1px 6px; border-radius: 12px; }
-.f-hero-genre { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 25px; text-transform: lowercase; }
+.f-hero-genre { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; text-transform: lowercase; }
 
-.f-btn-play { background-color: var(--accent); color: #000; border: none; padding: 14px 35px; border-radius: 30px; font-size: 1rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.2s ease; width: 100%; max-width: 250px; justify-content: center; }
+.f-btn-play { background-color: var(--accent); color: #000; border: none; padding: 12px 35px; border-radius: 30px; font-size: 1rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.2s ease; width: 100%; max-width: 250px; justify-content: center; }
 .f-btn-play:hover { transform: scale(1.05); background-color: #00e6e6; }
 
 /* ---------------- TITLES ---------------- */
-.f-sec-title { margin: 30px 5% 15px; font-size: 1.05rem; font-weight: 500; display: flex; align-items: center; color: #ddd; text-transform: uppercase; gap: 8px; }
-.f-sec-center { justify-content: center; }
-.f-sec-left { justify-content: flex-start; }
-.f-sec-title i { color: #888; }
-.f-sec-left i { color: var(--accent); }
+.f-sec-title { margin: 30px 5% 15px; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; justify-content: flex-start; color: #ddd; text-transform: uppercase; gap: 10px; }
 
-/* ---------------- TRENDING SLIDER (Bulletproof 16:9 Hack) ---------------- */
+/* ---------------- TRENDING SLIDER (16:9) ---------------- */
 .f-trend-slider { display: flex; overflow-x: auto; padding: 0 5% 20px; gap: 15px; scrollbar-width: none; scroll-snap-type: x mandatory; }
 .f-trend-slider::-webkit-scrollbar { display: none; }
 
 .f-trend-card { flex: 0 0 260px; scroll-snap-align: start; display: block; transition: transform 0.2s; }
 .f-trend-card:hover { transform: scale(1.03); }
 
-.f-trend-img-wrap { position: relative; width: 100%; padding-top: 56.25%; /* Forces perfect 16:9 Box */ border-radius: 8px; overflow: hidden; background: #111; }
+.f-trend-img-wrap { position: relative; width: 100%; padding-top: 56.25%; border-radius: 8px; overflow: hidden; background: #111; }
 .f-trend-img-wrap img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
 .f-trend-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.1) 60%, transparent 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 12px; }
 .f-trend-title { font-size: 0.9rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
 .f-trend-genre { font-size: 0.7rem; color: var(--accent); text-transform: lowercase; }
 
-/* ---------------- RECOMMENDED GRID (Bulletproof 2:3 Hack) ---------------- */
-/* minmax(0, 1fr) stops massive images from blowing out the columns */
+/* ---------------- RECOMMENDED GRID (2:3) ---------------- */
 .f-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; padding: 0 5% 40px; }
 
 .f-grid-card { display: flex; flex-direction: column; text-decoration: none; min-width: 0; transition: transform 0.2s; }
 .f-grid-card:hover { transform: translateY(-5px); }
 
-.f-grid-img-wrap { position: relative; width: 100%; padding-top: 150%; /* Forces perfect 2:3 Box */ border-radius: 6px; overflow: hidden; background: #111; margin-bottom: 8px; }
+.f-grid-img-wrap { position: relative; width: 100%; padding-top: 150%; border-radius: 6px; overflow: hidden; background: #111; margin-bottom: 8px; }
 .f-grid-img-wrap img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
 .f-hd-badge { position: absolute; top: 6px; left: 6px; background-color: var(--accent); color: #000; font-size: 0.6rem; padding: 2px 5px; border-radius: 2px; font-weight: 800; z-index: 2; }
 
 .f-grid-meta { display: flex; align-items: center; justify-content: space-between; font-size: 0.65rem; color: #777; margin-bottom: 4px; }
-.f-type-badge { border: 1px solid #333; padding: 1px 6px; border-radius: 10px; }
+.f-type-badge { border: 1px solid #333; padding: 1px 6px; border-radius: 10px; text-transform: capitalize; }
 .f-grid-title { font-size: 0.85rem; font-weight: 500; color: #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ---------------- PLAYER ---------------- */
@@ -86,27 +88,25 @@ a { text-decoration: none; color: inherit; }
 .f-player-wrap iframe { width: 100%; height: 100%; border: none; }
 .f-overview { max-width: 800px; margin: 0 auto; padding: 25px 5%; font-size: 0.85rem; color: #aaa; line-height: 1.6; text-align: center; }
 
-/* ---------------- MOBILE BOTTOM NAV ---------------- */
-.f-bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 55px; background: rgba(10, 10, 10, 0.98); border-top: 1px solid #1a1a1a; display: flex; justify-content: space-around; align-items: center; z-index: 999; backdrop-filter: blur(5px); }
-.f-nav-item { display: flex; flex-direction: column; align-items: center; color: #555; font-size: 0.65rem; gap: 4px; font-weight: 500; }
-.f-nav-item i { font-size: 1.1rem; }
-.f-nav-item.active { color: var(--accent); }
+footer { background-color: #080808; padding: 40px 5% 50px; text-align: center; font-size: 0.75rem; color: #555;}
+.footer-logo { font-size: 1.3rem; font-weight: 800; margin-bottom: 15px; color: #fff;}
+.footer-links { display: flex; justify-content: center; gap: 20px; color: #777; }
 
-/* ---------------- PC DESKTOP ADAPTATION ---------------- */
+/* ---------------- PC DESKTOP HORIZONTAL FIX ---------------- */
 @media (min-width: 768px) {
     .f-nav-center { display: block; position: absolute; left: 50%; transform: translateX(-50%); }
     .f-nav-right .f-mobile-search { display: none; }
+    .f-mobile-search-bar { display: none !important; }
     
-    .f-hero-wrapper { height: 75vh; }
+    /* Forces Hero to be purely horizontal on desktop */
+    .f-hero-wrapper { height: 50vh; max-height: 550px; }
+    
     /* Left Align for PC */
     .f-hero-content { align-items: flex-start; text-align: left; padding-left: 5%; max-width: 650px; }
     .f-hero-title { font-size: 3.2rem; }
     .f-hero-meta { justify-content: flex-start; font-size: 0.9rem;}
-    .f-btn-play { max-width: 250px; }
+    .f-btn-play { max-width: 200px; }
     
-    .f-trend-card { flex: 0 0 350px; }
+    .f-trend-card { flex: 0 0 320px; }
     .f-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 20px 15px; }
-    
-    .f-bottom-nav { display: none; }
-    body { padding-bottom: 0; }
 }
